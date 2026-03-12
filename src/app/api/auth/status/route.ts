@@ -6,5 +6,9 @@ export async function GET() {
   if (!db) return NextResponse.json({ connected: false });
   const [row] = await db.select().from(auth).limit(1);
   if (!row) return NextResponse.json({ connected: false });
-  return NextResponse.json({ connected: true, username: row.username });
+  return NextResponse.json({
+    connected: true,
+    username: row.username,
+    expiresAt: row.expiresAt?.toISOString() ?? null,
+  });
 }

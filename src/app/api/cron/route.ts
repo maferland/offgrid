@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { scheduledStories, seenMentions } from "@/lib/db/schema";
 import { publishStory, fetchMentions } from "@/lib/instagram";
 import { deleteBlob } from "@/lib/blob";
+import { refreshTokenIfNeeded } from "@/lib/token-refresh";
 import { eq, lte, and } from "drizzle-orm";
 
 export async function GET(req: Request) {
@@ -11,6 +12,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 503 });
+
+  // Auto-refresh token if expiring soon
+  await refreshTokenIfNeeded();
 
   const results = { published: 0, failed: 0, newMentions: 0 };
 
