@@ -28,7 +28,7 @@ export default function MentionsPage() {
   const fetchMentions = useCallback(async () => {
     const res = await fetch("/api/instagram/mentions");
     const data = await res.json();
-    setMentions(data);
+    setMentions(Array.isArray(data) ? data : []);
     setLoading(false);
   }, []);
 
