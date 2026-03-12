@@ -5,6 +5,8 @@ import { deleteBlob } from "@/lib/blob";
 import { eq } from "drizzle-orm";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 503 });
+
   const { id } = await params;
   const [story] = await db
     .select()
@@ -15,7 +17,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Clean up blob
   await deleteBlob(story.blobUrl).catch(() => {});
   await db.delete(scheduledStories).where(eq(scheduledStories.id, id));
 

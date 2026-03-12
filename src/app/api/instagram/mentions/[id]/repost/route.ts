@@ -5,11 +5,10 @@ import { db } from "@/lib/db";
 import { seenMentions } from "@/lib/db/schema";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 503 });
+
   const { id } = await params;
   try {
-    // Fetch the mention media
-    // We need to download the image and re-upload to Vercel Blob
-    // since Instagram media URLs may be temporary
     const mentionsRes = await fetch(
       `${process.env.NEXT_PUBLIC_URL ?? ""}/api/instagram/mentions`
     );
@@ -19,21 +18,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Mention not found" }, { status: 404 });
     }
 
-    // Download media
     const mediaRes = await fetch(mention.media_url);
     const blob = await mediaRes.blob();
     const file = new File([blob], `repost-${id}.jpg`, { type: blob.type });
-
-    // Upload to Vercel Blob
     const blobUrl = await uploadToBlob(file);
-
-    // Publish as story
     const storyId = await publishStory(blobUrl);
-
-    // Clean up
     await deleteBlob(blobUrl).catch(() => {});
 
-    // Mark as reposted
     await db
       .insert(seenMentions)
       .values({ mentionId: id, action: "reposted" })

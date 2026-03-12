@@ -5,15 +5,14 @@ import { publishStory, fetchMentions } from "@/lib/instagram";
 import { deleteBlob } from "@/lib/blob";
 import { eq, lte, and } from "drizzle-orm";
 
-export async function GET(req: Request) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST() {
+  if (!db) {
+    return NextResponse.json({ error: "Database not connected" }, { status: 503 });
   }
-  if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 503 });
 
   const results = { published: 0, failed: 0, newMentions: 0 };
 
+  // 1. Publish due stories
   const dueStories = await db
     .select()
     .from(scheduledStories)
@@ -53,15 +52,19 @@ export async function GET(req: Request) {
     }
   }
 
+  // 2. Poll mentions
   try {
     const mentions = await fetchMentions();
     const existingIds = await db.select({ id: seenMentions.mentionId }).from(seenMentions);
     const existingSet = new Set(existingIds.map((r) => r.id));
+
     for (const mention of mentions) {
-      if (!existingSet.has(mention.id)) results.newMentions++;
+      if (!existingSet.has(mention.id)) {
+        results.newMentions++;
+      }
     }
   } catch {
-    // non-critical
+    // Mention polling is non-critical
   }
 
   return NextResponse.json(results);
