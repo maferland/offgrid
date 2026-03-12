@@ -1,38 +1,37 @@
 # Offgrid
 
-Tauri 2.x desktop app — React/TypeScript frontend + Rust backend.
+Next.js 15 web app — Instagram story manager. Publish, schedule, and repost tagged mentions.
+
+## Stack
+
+- Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS 4
+- Vercel Postgres (Neon) + Drizzle ORM
+- Vercel Blob (temporary media storage)
+- Instagram Graph API
 
 ## Build
 
 ```bash
 bun install
-bun run tauri dev     # dev mode with HMR
-bun run tauri build   # release build (.app + .dmg)
+bun run dev          # dev server
+bun run build        # production build
 ```
 
-## Rust
+## Database
 
 ```bash
-cd src-tauri
-cargo check           # type check
-cargo clippy          # lint
-cargo test            # tests
-```
-
-## Frontend
-
-```bash
-bun run dev           # vite dev server only (no Tauri)
-bun run build         # production build
+bunx drizzle-kit push   # push schema to DB
+bunx drizzle-kit studio # browse DB
 ```
 
 ## Environment Variables
 
-- `INSTAGRAM_APP_ID` — Meta Developer App ID
-- `INSTAGRAM_APP_SECRET` — Meta Developer App Secret
+- `POSTGRES_URL` — Vercel Postgres connection string
+- `BLOB_READ_WRITE_TOKEN` — Vercel Blob token
+- `CRON_SECRET` — protects the /api/cron endpoint
 
 ## Structure
 
-- `src/` — React frontend (pages, components, lib)
-- `src-tauri/src/` — Rust backend (commands, db, instagram API client)
-- `src-tauri/src/instagram/` — auth, media upload, mentions polling
+- `src/app/` — pages (dashboard, publish, queue, mentions, settings) + API routes
+- `src/components/` — UI components (sidebar, phone preview, drop zone, etc.)
+- `src/lib/` — DB schema, Instagram client, blob helpers
