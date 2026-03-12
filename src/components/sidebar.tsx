@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -24,7 +25,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-[200px] flex-col border-r border-border bg-surface">
       <div className="flex items-center gap-2 px-4 py-5">
-        <div className="h-7 w-7 rounded-lg bg-accent" />
+        <Image src="/logo-64.png" alt="Offgrid" width={28} height={28} className="rounded-lg" />
         <span className="text-lg font-semibold text-text">Offgrid</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-2">
