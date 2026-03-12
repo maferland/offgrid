@@ -26,8 +26,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(enriched);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch mentions";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json([]);
   }
 }

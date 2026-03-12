@@ -35,7 +35,7 @@ export default function QueuePage() {
   async function fetchQueue() {
     const res = await fetch("/api/queue");
     const data = await res.json();
-    setStories(data);
+    setStories(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
