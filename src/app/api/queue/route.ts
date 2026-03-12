@@ -5,6 +5,8 @@ import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
+  if (!db) return NextResponse.json([]);
+
   const stories = await db
     .select()
     .from(scheduledStories)
@@ -13,12 +15,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 503 });
+
   const { blobUrl, caption, scheduledAt } = await req.json();
   if (!blobUrl || !scheduledAt) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Get max position
   const existing = await db
     .select({ position: scheduledStories.position })
     .from(scheduledStories)

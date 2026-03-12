@@ -5,6 +5,8 @@ import { seenMentions } from "@/lib/db/schema";
 import { inArray } from "drizzle-orm";
 
 export async function GET() {
+  if (!db) return NextResponse.json([]);
+
   try {
     const mentions = await fetchMentions();
     const mentionIds = mentions.map((m) => m.id);

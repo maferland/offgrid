@@ -4,6 +4,7 @@ import { auth } from "./db/schema";
 const GRAPH_API = "https://graph.instagram.com/v21.0";
 
 async function getAuth() {
+  if (!db) throw new Error("Database not connected");
   const [row] = await db.select().from(auth).limit(1);
   if (!row) throw new Error("Not authenticated");
   return row;
@@ -19,7 +20,6 @@ export async function validateToken(accessToken: string, userId: string) {
 export async function publishStory(imageUrl: string) {
   const { accessToken, userId } = await getAuth();
 
-  // Create media container
   const createRes = await fetch(`${GRAPH_API}/${userId}/media`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -35,10 +35,8 @@ export async function publishStory(imageUrl: string) {
   }
   const { id: containerId } = await createRes.json();
 
-  // Wait for container to be ready
   await waitForContainer(containerId, accessToken);
 
-  // Publish
   const publishRes = await fetch(`${GRAPH_API}/${userId}/media_publish`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
